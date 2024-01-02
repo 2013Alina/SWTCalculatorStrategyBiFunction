@@ -1,11 +1,15 @@
 package com.swtcalculator;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -29,20 +33,24 @@ public class CalculatorSWT {
 	private GridLayout gridLayout;
 	private TabItem itemCalculator;
 	private Composite compositeCalculator;
-	private Text textOperandFirst;
+	private Composite compositeHistory;
+	private StyledText textOperandFirst;
 	private Combo operationCombo;
-	private Text textOperandSecond;
+	private StyledText textOperandSecond;
 	private Button checkButton;
 	private Button calculateButton;
 	private Label label;
 	private Text textResult;
 	private TabItem itemHistory;
 	private Calculator calculator;
+	private Validation validation;
+	private History history;
 
 	public void createContents() {
 
 		display = new Display();
-		shell = new Shell();
+		shell = new Shell(display);
+		shell.setText("Calculator");
 		layout = new FillLayout();
 		layout.marginHeight = 10;
 		layout.marginWidth = 10;
@@ -51,6 +59,8 @@ public class CalculatorSWT {
 		shell.setBackground(color1);
 
 		calculator = new Calculator();
+		validation = new Validation();
+		history = new History();
 
 		tabFolder = new TabFolder(shell, SWT.BORDER);
 		gridLayout = new GridLayout();
@@ -66,10 +76,26 @@ public class CalculatorSWT {
 		Color color2 = new Color(255, 204, 255);
 		compositeCalculator.setBackground(color2);
 
-		textOperandFirst = new Text(compositeCalculator, SWT.BORDER);
+		textOperandFirst = new StyledText(compositeCalculator, SWT.BORDER);
 		textOperandFirst.setSize(100, 20);
 		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		textOperandFirst.setLayoutData(gridData);
+		textOperandFirst.addVerifyListener(new VerifyListener() {
+			@Override
+			public void verifyText(VerifyEvent event) {
+				String input = textOperandFirst.getText().substring(0, event.start) + event.text
+						+ textOperandFirst.getText().substring(event.end);
+				event.doit = validation.validateOperand(input);
+			}
+		});
+		textOperandFirst.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent event) {
+				if (!calculateButton.isEnabled()) {
+					count();
+				}
+			}
+		});
 
 		operationCombo = new Combo(compositeCalculator, SWT.NONE);
 		String[] mathOperations = new String[] { "+", "-", "*", "/" };
@@ -84,15 +110,38 @@ public class CalculatorSWT {
 			}
 		});
 
-		textOperandSecond = new Text(compositeCalculator, SWT.BORDER);
+		textOperandSecond = new StyledText(compositeCalculator, SWT.BORDER);
 		textOperandSecond.setSize(100, 20);
 		textOperandSecond.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		textOperandSecond.addVerifyListener(new VerifyListener() {
+			@Override
+			public void verifyText(VerifyEvent event) {
+				String input = textOperandSecond.getText().substring(0, event.start) + event.text
+						+ textOperandSecond.getText().substring(event.end);
+				event.doit = validation.validateOperand(input);
+			}
+		});
+		textOperandSecond.addModifyListener(new ModifyListener() {
+		    @Override
+		    public void modifyText(ModifyEvent e) {
+		    	if (!calculateButton.isEnabled()) {
+		    		count();
+				}  
+		    }
+		});
 
 		checkButton = new Button(compositeCalculator, SWT.CHECK);
 		checkButton.setText("Calculator on the fly");
 		gridData = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
 		gridData.verticalIndent = 250;
 		checkButton.setLayoutData(gridData);
+		checkButton.addSelectionListener(new SelectionAdapter() {
+		    @Override
+		    public void widgetSelected(SelectionEvent e) {
+		        boolean isChecked = checkButton.getSelection();
+		        calculateButton.setEnabled(!isChecked);
+		    }
+		});
 
 		calculateButton = new Button(compositeCalculator, SWT.PUSH);
 		calculateButton.setText("Calculate");
@@ -102,18 +151,9 @@ public class CalculatorSWT {
 		calculateButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				String operandFirst = textOperandFirst.getText();
-				Double doubleFirstOperand = Double.parseDouble(operandFirst);
-				String operandSecond = textOperandSecond.getText();
-				Double doubleSecondOperand = Double.parseDouble(operandSecond);
-				String operation = operationCombo.getText();
-
-				Map<String, Double> biFunctionMap = new LinkedHashMap<>();
-				Double result = calculator.calculate(doubleFirstOperand, doubleSecondOperand);
-				String resultString = String.valueOf(result);
-				textResult.setText(resultString);
-				biFunctionMap.put(operation, result);
+				count();
 			}
+
 		});
 
 		label = new Label(compositeCalculator, SWT.NONE);
@@ -130,8 +170,20 @@ public class CalculatorSWT {
 
 		itemHistory = new TabItem(tabFolder, SWT.NONE);
 		itemHistory.setText("History");
+		compositeHistory = new Composite(tabFolder, SWT.NONE);
+		itemHistory.setControl(compositeHistory);
+		compositeHistory.setLayout(new GridLayout(1, true));
+		
 		Color color3 = new Color(204, 255, 255);
-
+		compositeHistory.setBackground(color3);
+		
+		List<String> calculations = history.getCalculations();
+		String historyText = String.join("\n",calculations);
+		Text historyTextWidget = new Text(compositeHistory, SWT.BORDER);
+		gridData = new GridData(SWT.FILL, SWT.BEGINNING, true, false, 1, 1);
+		historyTextWidget.setLayoutData(gridData);
+		historyTextWidget.setText(historyText);
+		
 		shell.pack();
 		shell.setSize(400, 500);
 	}
@@ -145,5 +197,28 @@ public class CalculatorSWT {
 		}
 		display.dispose();
 	}
+	
+	private void count() {
+		String operandFirst = textOperandFirst.getText();
+		Double doubleFirstOperand = Double.parseDouble(operandFirst);
+		String operandSecond = textOperandSecond.getText();
+		Double doubleSecondOperand = Double.parseDouble(operandSecond);
+		String operationText = operationCombo.getText();
+
+		Double result = calculator.calculate(doubleFirstOperand, doubleSecondOperand);
+		String resultString = String.valueOf(result);
+		textResult.setText(resultString);
+
+		String mathExpression = operandFirst + " " + operationText + " " + operandSecond + " = "
+				+ resultString + " ;\n";
+		addToHistory(mathExpression);
+	}
+
+	private void addToHistory(String mathExpression) {
+		history.addCalculation(mathExpression);
+		Text historyTextWidget = (Text) ((Composite) itemHistory.getControl()).getChildren()[0];
+		historyTextWidget.setText(String.join("\n", history.getCalculations()));
+	}
 
 }
+

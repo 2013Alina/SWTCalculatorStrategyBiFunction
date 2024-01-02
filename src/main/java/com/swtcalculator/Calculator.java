@@ -16,6 +16,7 @@ public class Calculator {
 	public void setOperation(String operation) {
 		this.operation = operationMap.get(operation);
 	}
+	
 
 	public BiFunction<Double, Double, Double> getOperation() {
 		return operation;
@@ -27,7 +28,6 @@ public class Calculator {
 		} else {
 			return null;
 		}
-
 	}
 
 	private void initOperationMap() {
@@ -37,4 +37,5 @@ public class Calculator {
 		operationMap.put("/", (a, b) -> a / b);
 
 	}
+	
 }
