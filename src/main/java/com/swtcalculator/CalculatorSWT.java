@@ -1,7 +1,5 @@
 package com.swtcalculator;
 
-import java.util.List;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
@@ -19,6 +17,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -45,6 +44,7 @@ public class CalculatorSWT {
 	private Calculator calculator;
 	private Validation validation;
 	private History history;
+	private org.eclipse.swt.widgets.List historyList;
 
 	public void createContents() {
 
@@ -177,12 +177,13 @@ public class CalculatorSWT {
 		Color color3 = new Color(204, 255, 255);
 		compositeHistory.setBackground(color3);
 		
-		List<String> calculations = history.getCalculations();
-		String historyText = String.join("\n",calculations);
-		Text historyTextWidget = new Text(compositeHistory, SWT.BORDER);
-		gridData = new GridData(SWT.FILL, SWT.BEGINNING, true, false, 1, 1);
-		historyTextWidget.setLayoutData(gridData);
-		historyTextWidget.setText(historyText);
+		historyList = new List(compositeHistory, SWT.BORDER | SWT.V_SCROLL);
+        gridData = new GridData(SWT.FILL, SWT.BEGINNING, true, false, 1, 1);
+        gridData.heightHint = 200;
+        historyList.setLayoutData(gridData);
+        
+        java.util.List<String> calculations = history.getCalculations();
+        historyList.setItems(calculations.toArray(new String[0])); 
 		
 		shell.pack();
 		shell.setSize(400, 500);
@@ -216,8 +217,8 @@ public class CalculatorSWT {
 
 	private void addToHistory(String mathExpression) {
 		history.addCalculation(mathExpression);
-		Text historyTextWidget = (Text) ((Composite) itemHistory.getControl()).getChildren()[0];
-		historyTextWidget.setText(String.join("\n", history.getCalculations()));
+		java.util.List<String> calculations = history.getCalculations();
+        historyList.setItems(calculations.toArray(new String[0]));
 	}
 
 }
