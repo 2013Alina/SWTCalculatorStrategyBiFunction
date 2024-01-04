@@ -30,6 +30,7 @@ public class CalculatorSWT {
 	private FillLayout layout;
 	private TabFolder tabFolder;
 	private GridLayout gridLayout;
+	private GridData gridData;
 	private TabItem itemCalculator;
 	private Composite compositeCalculator;
 	private Composite compositeHistory;
@@ -78,7 +79,8 @@ public class CalculatorSWT {
 
 		textOperandFirst = new StyledText(compositeCalculator, SWT.BORDER);
 		textOperandFirst.setSize(100, 20);
-		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+		gridData = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+		gridData.heightHint = 24;
 		textOperandFirst.setLayoutData(gridData);
 		textOperandFirst.addVerifyListener(new VerifyListener() {
 			@Override
@@ -101,7 +103,8 @@ public class CalculatorSWT {
 		String[] mathOperations = new String[] { "+", "-", "*", "/" };
 		operationCombo.setItems(mathOperations);
 		operationCombo.setSize(100, 20);
-		operationCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		gridData = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+		operationCombo.setLayoutData(gridData);
 		operationCombo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -112,7 +115,9 @@ public class CalculatorSWT {
 
 		textOperandSecond = new StyledText(compositeCalculator, SWT.BORDER);
 		textOperandSecond.setSize(100, 20);
-		textOperandSecond.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		gridData = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+		gridData.heightHint = 24;
+		textOperandSecond.setLayoutData(gridData);
 		textOperandSecond.addVerifyListener(new VerifyListener() {
 			@Override
 			public void verifyText(VerifyEvent event) {
@@ -218,7 +223,7 @@ public class CalculatorSWT {
 	private void addToHistory(String mathExpression) {
 		history.addCalculation(mathExpression);
 		java.util.List<String> calculations = history.getCalculations();
-        historyList.setItems(calculations.toArray(new String[0]));
+		historyList.setItems(calculations.toArray(new String[0]));
 	}
 
 }
