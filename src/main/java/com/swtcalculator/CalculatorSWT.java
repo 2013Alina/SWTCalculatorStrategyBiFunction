@@ -46,6 +46,7 @@ public class CalculatorSWT {
 	private Validation validation;
 	private History history;
 	private org.eclipse.swt.widgets.List historyList;
+	private Color color1, color2, color3;
 
 	public void createContents() {
 
@@ -56,7 +57,7 @@ public class CalculatorSWT {
 		layout.marginHeight = 10;
 		layout.marginWidth = 10;
 		shell.setLayout(layout);
-		Color color1 = new Color(204, 102, 255);
+		color1 = new Color(204, 102, 255);
 		shell.setBackground(color1);
 
 		calculator = new Calculator();
@@ -74,7 +75,7 @@ public class CalculatorSWT {
 		compositeCalculator = new Composite(tabFolder, SWT.NONE);
 		itemCalculator.setControl(compositeCalculator);
 		compositeCalculator.setLayout(new GridLayout(3, true));
-		Color color2 = new Color(255, 204, 255);
+		color2 = new Color(255, 204, 255);
 		compositeCalculator.setBackground(color2);
 
 		textOperandFirst = new StyledText(compositeCalculator, SWT.BORDER);
@@ -179,7 +180,7 @@ public class CalculatorSWT {
 		itemHistory.setControl(compositeHistory);
 		compositeHistory.setLayout(new GridLayout(1, true));
 		
-		Color color3 = new Color(204, 255, 255);
+		color3 = new Color(204, 255, 255);
 		compositeHistory.setBackground(color3);
 		
 		historyList = new List(compositeHistory, SWT.BORDER | SWT.V_SCROLL);
@@ -190,8 +191,15 @@ public class CalculatorSWT {
         java.util.List<String> calculations = history.getCalculations();
         historyList.setItems(calculations.toArray(new String[0])); 
 		
+        shell.addDisposeListener(e -> disposeResources());
 		shell.pack();
 		shell.setSize(400, 500);
+	}
+	
+	private void disposeResources() {
+		color1.dispose();
+		color2.dispose();
+		color3.dispose();
 	}
 
 	public void open() {
